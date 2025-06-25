@@ -1,0 +1,37 @@
+#define LED_PIN 8
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(LED_PIN, OUTPUT);
+  delay(1000); // Aguarda o escravo iniciar
+}
+
+void loop() {
+  // Envia solicitação para o escravo com ID 0x01
+  Serial.write(0xAA);
+  Serial.write(0x01);
+  Serial.write(0x00); // comando de leitura
+  Serial.write(0xFF);
+
+  // Aguarda resposta
+  delay(100); // tempo para o escravo responder
+
+  // Verifica se chegou resposta
+  if (Serial.available() >= 4) {
+    if (Serial.read() == 0xAA) {
+      byte id = Serial.read();
+      byte data = Serial.read();
+      byte end = Serial.read();
+
+      if (end == 0xFF && id == 0x01) {
+        if (data == 0x01) {
+          digitalWrite(LED_PIN, HIGH); // liga LED
+        } else if (data == 0x02) {
+          digitalWrite(LED_PIN, LOW); // desliga LED
+        }
+      }
+    }
+  }
+
+  delay(1000); // ciclo de 1 segundo
+}
