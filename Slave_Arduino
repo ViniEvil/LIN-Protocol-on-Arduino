@@ -1,0 +1,28 @@
+#define SENSOR_PIN 7
+#define MY_ID 0x01
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(SENSOR_PIN, INPUT);
+}
+
+void loop() {
+  if (Serial.available() >= 4) {
+    if (Serial.read() == 0xAA) {
+      byte id = Serial.read();
+      byte command = Serial.read();
+      byte end = Serial.read();
+
+      if (end == 0xFF && id == MY_ID && command == 0x00) {
+        // lê sensor e envia resposta
+        byte sensorState = digitalRead(SENSOR_PIN);
+        byte response = (sensorState == HIGH) ? 0x01 : 0x02;
+
+        Serial.write(0xAA);
+        Serial.write(MY_ID);
+        Serial.write(response);
+        Serial.write(0xFF);
+      }
+    }
+  }
+}
